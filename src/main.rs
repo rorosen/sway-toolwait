@@ -49,18 +49,18 @@ fn main() -> Fallible<()> {
 
     for event in event_stream? {
         if let Ok(Event::Window(window_event)) = event {
-            if cli.check.nocheck {
-                std::process::exit(0);
-            } else {
-                if window_event.change == WindowChange::New {
+            if window_event.change == WindowChange::New {
+                if cli.check.nocheck {
+                    return Ok(());
+                } else {
                     if let Some(app_id) = window_event.container.app_id {
                         if app_id == cli.check.waitfor {
-                            std::process::exit(0);
+                            return Ok(());
                         }
                     } else if let Some(properties) = window_event.container.window_properties {
                         if let Some(instance) = properties.instance {
                             if instance == cli.check.waitfor {
-                                std::process::exit(0);
+                                return Ok(());
                             }
                         }
                     }
