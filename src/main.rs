@@ -48,7 +48,7 @@ fn main() -> Fallible<()> {
     connection.run_command(format!("exec {}", cli.command))?;
 
     for event in event_stream? {
-        if let Ok(Event::Window(window_event)) = event {
+        if let Event::Window(window_event) = event? {
             if window_event.change == WindowChange::New {
                 if cli.check.nocheck {
                     return Ok(());
@@ -68,5 +68,7 @@ fn main() -> Fallible<()> {
             }
         }
     }
-    Ok(())
+
+    eprintln!("stopped to receive window events");
+    std::process::exit(1);
 }
