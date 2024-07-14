@@ -11,28 +11,27 @@
     };
   };
 
-  outputs = {
-    crane,
-    flake-utils,
-    ...
-  }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      craneLib = crane.lib.${system};
-
-      src = craneLib.cleanCargoSource (craneLib.path ./.);
-      commonArgs = {
-        inherit src;
-
-        pname = "sway-toolwait";
-        version = "1.0.0";
-      };
-      cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-
-      sway-toolwait = craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-        });
-    in {
-      packages.default = sway-toolwait;
-    });
+  outputs =
+    {
+      nixpkgs,
+      crane,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        craneLib = crane.mkLib nixpkgs.legacyPackages.${system};
+        src = craneLib.cleanCargoSource (craneLib.path ./.);
+        commonArgs = {
+          inherit src;
+          inherit (craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }) pname version;
+        };
+        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        sway-toolwait = craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
+      in
+      {
+        packages.default = sway-toolwait;
+      }
+    );
 }
