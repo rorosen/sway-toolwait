@@ -13,7 +13,6 @@ struct Cli {
 }
 
 #[derive(Debug, Args)]
-// #[group(required = true, multiple = false)]
 struct SwayArgs {
     /// Workspace to run command on
     #[arg(short = 's', long)]
