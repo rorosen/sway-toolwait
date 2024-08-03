@@ -18,20 +18,24 @@
       flake-utils,
       ...
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        craneLib = crane.mkLib nixpkgs.legacyPackages.${system};
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
-        commonArgs = {
-          inherit src;
-          inherit (craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }) pname version;
-        };
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-        sway-toolwait = craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
-      in
-      {
-        packages.default = sway-toolwait;
-      }
-    );
+    let
+      mkSwayToolwait =
+        pkgs:
+        let
+          craneLib = crane.mkLib pkgs;
+          src = craneLib.cleanCargoSource (craneLib.path ./.);
+          commonArgs = {
+            inherit src;
+            inherit (craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }) pname version;
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in
+        craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
+    in
+    (flake-utils.lib.eachDefaultSystem (system: {
+      packages.default = mkSwayToolwait nixpkgs.legacyPackages.${system};
+    }))
+    // {
+      overlays.default = _final: prev: { sway-toolwait = mkSwayToolwait prev; };
+    };
 }
