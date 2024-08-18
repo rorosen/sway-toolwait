@@ -13,14 +13,15 @@ nix build .\#packages.x86_64-linux.default
 
 ## How to Run
 
-Specify at least the workspace and the exec command that should be run.
+Specify at least the workspace and the exec command to run. This will just wait for any new window
+to appear, ignoring which window it is.
 
 ```shell
 ./result/bin/sway-toolwait --workspace 7 --command alacritty
 ```
 
-You can also pass an `app_id` (or instance string for xwayland) that the new window must match. You
-can get it for example from the output of `swaymsg -t get_tree`.
+You can also use the `--waitfor` argument to pass an `app_id` (or instance string for xwayland) that
+the new window must match. You can get it for example from the output of `swaymsg -t get_tree`.
 
 ```shell
 ./result/bin/sway-toolwait --workspace 7 --command alacritty --waitfor Alacritty
