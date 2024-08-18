@@ -4,38 +4,14 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
-    {
-      nixpkgs,
-      crane,
-      flake-utils,
-      ...
-    }:
-    let
-      mkSwayToolwait =
-        pkgs:
-        let
-          craneLib = crane.mkLib pkgs;
-          src = craneLib.cleanCargoSource (craneLib.path ./.);
-          commonArgs = {
-            inherit src;
-            inherit (craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }) pname version;
-          };
-          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-        in
-        craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
-    in
-    (flake-utils.lib.eachDefaultSystem (system: {
-      packages.default = mkSwayToolwait nixpkgs.legacyPackages.${system};
-    }))
+    { nixpkgs, flake-utils, ... }:
+    flake-utils.lib.eachDefaultSystem (system: {
+      packages.default = nixpkgs.legacyPackages.${system}.callPackage ./build.nix { };
+    })
     // {
-      overlays.default = _final: prev: { sway-toolwait = mkSwayToolwait prev; };
+      overlays.default = _final: prev: { sway-toolwait = prev.callPackage ./build.nix { }; };
     };
 }
