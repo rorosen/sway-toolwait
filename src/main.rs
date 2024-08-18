@@ -28,7 +28,7 @@ struct SwayArgs {
 
     /// Additional arguments that are passed to the exec command
     #[arg(allow_hyphen_values = true, last = true)]
-    pub extra_args: Vec<String>,
+    extra_args: Vec<String>,
 }
 
 fn main() -> ExitCode {
