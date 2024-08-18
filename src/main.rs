@@ -25,12 +25,15 @@ struct SwayArgs {
     /// app_id (wayland) or instance string (xwayland) to wait for
     #[arg(short, long)]
     waitfor: Option<String>,
+
+    /// Additional arguments that are passed to the exec command
+    #[arg(allow_hyphen_values = true, last = true)]
+    pub extra_args: Vec<String>,
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let (tx, rx) = mpsc::channel();
-
     thread::spawn(move || tx.send(wait(&cli.sway)));
 
     match rx.recv_timeout(Duration::from_secs(cli.timeout)) {
@@ -49,9 +52,12 @@ fn main() -> ExitCode {
 fn wait(sway: &SwayArgs) -> Result<(), swayipc::Error> {
     let mut connection = Connection::new()?;
     let event_stream = Connection::new()?.subscribe([EventType::Window])?;
-
     connection.run_command(format!("workspace {}", sway.workspace))?;
-    connection.run_command(format!("exec {}", sway.command))?;
+    connection.run_command(format!(
+        "exec {} {}",
+        sway.command,
+        sway.extra_args.join(" ")
+    ))?;
 
     for event in event_stream {
         match event? {

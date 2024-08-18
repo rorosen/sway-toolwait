@@ -1,8 +1,7 @@
 # Sway Toolwait
 
-Really simple tool that runs a sway exec command and waits on a specified
-workspace for a new window to appear. I use it to organize applications on
-workspaces during startup. Also works with i3.
+Really simple tool that runs a sway exec command and waits on a specified workspace for a new window
+to appear. I use it to organize applications on workspaces during startup. Also works with i3.
 
 ## How to Build
 
@@ -20,11 +19,17 @@ Specify at least the workspace and the exec command that should be run.
 ./result/bin/sway-toolwait --workspace 7 --command alacritty
 ```
 
-You can also pass an `app_id` (or instance string for xwayland) that the new
-window must match. You can get it from the output of `swaymsg -t get_tree`.
+You can also pass an `app_id` (or instance string for xwayland) that the new window must match. You
+can get it for example from the output of `swaymsg -t get_tree`.
 
 ```shell
 ./result/bin/sway-toolwait --workspace 7 --command alacritty --waitfor Alacritty
+```
+
+Use a trailing `--` to specify additional arguments that are passed to the exec command.
+
+```shell
+./result/bin/sway-toolwait --workspace 7 --command alacritty --waitfor Alacritty -- --working-directory /my/work/dir
 ```
 
 Check `./result/bin/sway-toolwait --help` for all options.
