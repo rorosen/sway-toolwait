@@ -5,8 +5,6 @@ to appear. I use it to organize applications on workspaces during startup. Also 
 
 ## How to Build
 
-Use Nix to build it for your architecture.
-
 ```shell
 nix build .\#packages.x86_64-linux.default
 ```
@@ -34,3 +32,29 @@ Use a trailing `--` to specify additional arguments that are passed to the exec 
 ```
 
 Check `./result/bin/sway-toolwait --help` for all options.
+
+## Usage with Home Manager
+
+Import the provided home manager module and use the `wayland.windowManager.sway.toolwait` option.
+
+```nix
+imports = [ inputs.sway-toolwait.homeManagerModules.default ];
+
+wayland.windowManager.sway.toolwait = [
+  {
+    command = "${pkgs.firefox}/bin/firefox";
+    workspace = 1;
+    waitFor = "firefox";
+  }
+  {
+    command = "${pkgs.alacritty}/bin/alacritty";
+    workspace = 2;
+    waitFor = "Alacritty";
+  }
+  {
+    command = "${pkgs.keepassxc}/bin/keepassxc";
+    workspace = 10;
+    waitFor = "org.keepassxc.KeePassXC";
+  }
+];
+```

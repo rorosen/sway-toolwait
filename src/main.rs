@@ -9,7 +9,7 @@ struct Cli {
     timeout: u64,
 
     #[command(flatten)]
-    sway: SwayArgs,
+    sway_args: SwayArgs,
 }
 
 #[derive(Debug, Args)]
@@ -34,7 +34,7 @@ struct SwayArgs {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let (tx, rx) = mpsc::channel();
-    thread::spawn(move || tx.send(wait(&cli.sway)));
+    thread::spawn(move || tx.send(wait(&cli.sway_args)));
 
     match rx.recv_timeout(Duration::from_secs(cli.timeout)) {
         Ok(Ok(_)) => ExitCode::SUCCESS,
@@ -49,20 +49,20 @@ fn main() -> ExitCode {
     }
 }
 
-fn wait(sway: &SwayArgs) -> Result<(), swayipc::Error> {
+fn wait(sway_args: &SwayArgs) -> Result<(), swayipc::Error> {
     let mut connection = Connection::new()?;
     let event_stream = Connection::new()?.subscribe([EventType::Window])?;
-    connection.run_command(format!("workspace {}", sway.workspace))?;
+    connection.run_command(format!("workspace {}", sway_args.workspace))?;
     connection.run_command(format!(
         "exec {} {}",
-        sway.command,
-        sway.extra_args.join(" ")
+        sway_args.command,
+        sway_args.extra_args.join(" ")
     ))?;
 
     for event in event_stream {
         match event? {
             Event::Window(ev) if ev.change == WindowChange::New => {
-                match &sway.waitfor {
+                match &sway_args.waitfor {
                     Some(waitfor) => {
                         // TODO: chain once if-let-chains are stable https://github.com/rust-lang/rust/issues/53667
                         if let Some(app_id) = &ev.container.app_id {
