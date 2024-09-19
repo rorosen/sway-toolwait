@@ -39,7 +39,7 @@
                 --workspace ${builtins.toString workspace} \
                 --command "${command}" \
                 --timeout ${builtins.toString timeout} \
-                ${if waitFor == "" then "--nocheck" else "--waitfor ${waitFor}"}
+                ${lib.optionalString (waitFor != "") "--waitfor ${waitFor}"}
             '';
 
           toolwaitScript = pkgs.writeShellScript "sway-toolwait" ''
